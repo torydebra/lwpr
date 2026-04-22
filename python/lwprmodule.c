@@ -41,7 +41,7 @@ static const char *GaussBiSq[]={"Gaussian","BiSquare"};
 static void PyLWPR_dealloc(PyLWPR* self) {
    lwpr_free_model(&self->model);
    free(self->extra_in);
-   self->ob_type->tp_free((PyObject*)self);
+   Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
 static PyObject *get_array_from_vector(int n, const double *data) {
@@ -209,16 +209,16 @@ static PyObject *PyLWPR_G_n_pruned(PyLWPR *self, void *closure) {
 /**  "Getter and Setter" for kernel ***********************************************/
 static PyObject *PyLWPR_G_kernel(PyLWPR *self, void *closure) {
    int num = self->model.kernel == LWPR_BISQUARE_KERNEL ? 1:0;
-   return PyString_FromString(GaussBiSq[num]);
+   return PyUnicode_FromString(GaussBiSq[num]);
 }
 
 static int PyLWPR_S_kernel(PyLWPR *self, PyObject *value, void *closure) {
    const char *str;
-   if (!PyString_Check(value)) {
+   if (!PyUnicode_Check(value)) {
       PyErr_SetString(PyExc_TypeError, "Attribute 'kernel' must be a string (either 'Gaussian' or 'BiSquare').");
       return -1;
    }
-   str = PyString_AsString(value);
+   str = PyUnicode_AsUTF8(value);
    if (!strcasecmp(str,"Gaussian")) {
       self->model.kernel = LWPR_GAUSSIAN_KERNEL;
    } else if (!strcasecmp(str,"BiSquare")) {
@@ -247,8 +247,8 @@ static int PyLWPR_S_kernel(PyLWPR *self, PyObject *value, void *closure) {
 #define CHECK_GET_SCALAR(value, attr, dest) \
    if (PyFloat_Check(value)) {\
       dest = PyFloat_AsDouble(value);\
-   } else if (PyInt_Check(value)) {\
-      dest = PyInt_AsLong(value);\
+   } else if (PyLong_Check(value)) {\
+      dest = PyLong_AsLong(value);\
    } else {\
       PyErr_SetString(PyExc_TypeError, "Attribute '" attr "' must be a number.");\
       return -1;\
@@ -576,7 +576,7 @@ static PyObject *PyLWPR_repr(PyLWPR *obj) {
          m->meta_rate, m->init_lambda, m->final_lambda, m->tau_lambda, 
          m->add_threshold, GaussBiSq[m->kernel==LWPR_BISQUARE_KERNEL?1:0]);
          
-   return PyString_FromString(str);
+   return PyUnicode_FromString(str);
 }
 
 static PyObject *PyLWPR_update(PyLWPR *self, PyObject *args) {
@@ -802,16 +802,15 @@ static PyMethodDef PyLWPR_methods[] = {
 };
 
 static PyTypeObject PyLWPR_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                           /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "lwpr.LWPR",                 /* tp_name */
-    sizeof(PyLWPR)   ,           /* tp_basicsize */
+    sizeof(PyLWPR),              /* tp_basicsize */
     0,                           /* tp_itemsize */
     (destructor) PyLWPR_dealloc, /* tp_dealloc */
-    0,                           /* tp_print */
+    0,                           /* tp_vectorcall_offset */
     0,                           /* tp_getattr */
     0,                           /* tp_setattr */
-    0,                           /* tp_compare */
+    0,                           /* tp_as_async */
     (reprfunc) PyLWPR_repr,      /* tp_repr */
     0,                           /* tp_as_number */
     0,                           /* tp_as_sequence */
@@ -850,18 +849,28 @@ static PyTypeObject PyLWPR_Type = {
 
 static PyMethodDef lwpr_methods[] = {{NULL}};
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
-#endif
+static struct PyModuleDef lwpr_module = {
+   PyModuleDef_HEAD_INIT,
+   "lwpr",
+   "Python 3 wrapper for the C implementation of LWPR.",
+   -1,
+   lwpr_methods
+};
 
-PyMODINIT_FUNC initlwpr(void) {
+PyMODINIT_FUNC PyInit_lwpr(void) {
    PyObject* m;
 
-   if (PyType_Ready(&PyLWPR_Type) < 0) return;
+   if (PyType_Ready(&PyLWPR_Type) < 0) return NULL;
 
-   m = Py_InitModule3("lwpr", lwpr_methods, "Python wrapper for the C implementation of LWPR.");
+   m = PyModule_Create(&lwpr_module);
+   if (m == NULL) return NULL;
 
    Py_INCREF(&PyLWPR_Type);
-   PyModule_AddObject(m, "LWPR", (PyObject *)&PyLWPR_Type);
+   if (PyModule_AddObject(m, "LWPR", (PyObject *)&PyLWPR_Type) < 0) {
+      Py_DECREF(&PyLWPR_Type);
+      Py_DECREF(m);
+      return NULL;
+   }
    import_array();
+   return m;
 }

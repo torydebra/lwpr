@@ -72,18 +72,15 @@ if(${BUILD_EXAMPLES})
 endif(${BUILD_EXAMPLES})
 
 if(${BUILD_PYTHON})
-  set(Python_ADDITIONAL_VERSIONS 2.7)
-  find_package(PythonLibs REQUIRED)
-  find_package(PythonInterp REQUIRED)
-  find_package(NumPy REQUIRED)
-  include_directories(${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIR})
+  find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
+  include_directories(${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS})
   add_library(pylwpr MODULE python/lwprmodule.c)
-  target_link_libraries(pylwpr m lwpr ${PythonLibs_LIBRARIES})
+  target_link_libraries(pylwpr m lwpr ${Python3_LIBRARIES})
   set_target_properties(pylwpr PROPERTIES PREFIX "")
   set_target_properties(pylwpr PROPERTIES OUTPUT_NAME "lwpr")
   # CMake magic to extract path from https://stackoverflow.com/a/40006251
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c "if True:
+    COMMAND "${Python3_EXECUTABLE}" -c "if True:
       from distutils import sysconfig as sc
       print(sc.get_python_lib(prefix='', plat_specific=True))"
     OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
