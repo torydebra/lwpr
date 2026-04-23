@@ -31,7 +31,7 @@ for k in range(20):
         mse = mse + (Ytr[ind[i], :] - yp)**2
 
     nMSE = mse/Ntr/var(Ytr)
-    print "#Data: %5i  #RFs: %3i  nMSE=%5.3f" % (model.n_data, model.num_rfs, nMSE)
+    print ("#Data: %5i  #RFs: %3i  nMSE=%5.3f" % (model.n_data, model.num_rfs, nMSE))
 
 
 # test the model with unseen data
