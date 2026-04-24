@@ -734,6 +734,25 @@ static PyObject *PyLWPR_rf_D(PyLWPR *self, PyObject *args) {
    return get_array_from_matrix(model->nIn, model->nInStore, model->nIn, model->sub[dim].rf[n]->D);
 }
 
+static PyObject *PyLWPR_rf_w(PyLWPR *self, PyObject *args) {
+   int dim, n;
+   LWPR_Model *model = &(self->model);
+
+   if (!PyArg_ParseTuple(args, "ii", &dim, &n))  return NULL;
+   
+   if (dim<0 || dim>=model->nOut) {
+      PyErr_SetString(PyExc_TypeError, "First parameter must indicate output dimension (0 <= dim < model.nOut).");
+      return NULL;
+   }
+   
+   if (n<0 || n>=model->sub[dim].numRFS) {
+      PyErr_SetString(PyExc_TypeError, "Second parameter must indicate receptive field (0 <= n < model.num_rf[dim]).");
+      return NULL;
+   }
+
+   return PyFloat_FromDouble(model->sub[dim].rf[n]->w);
+}
+
 static PyObject *PyLWPR_write_XML(PyLWPR *self, PyObject *args) {
    char *filename;
    FILE *fp;
@@ -793,7 +812,9 @@ static PyMethodDef PyLWPR_methods[] = {
     {"rf_center", (PyCFunction)PyLWPR_rf_center, METH_VARARGS,
      "rf_center(dim,n) retrieves the center of the n-th receptive field in output dimension dim."},
     {"rf_D", (PyCFunction)PyLWPR_rf_D, METH_VARARGS,
-     "rf_D(dim,n) retrieves the distance metric of the n-th receptive field in output dimension dim."},
+     "rf_D(dim,n) retrieves the distance metric of the n-th receptive field in output dimension dim."},   
+    {"rf_w", (PyCFunction)PyLWPR_rf_w, METH_VARARGS,
+     "rf_w(dim, n) returns the activation weight of RF n for the last predict/update call."},
     {"write_XML", (PyCFunction)PyLWPR_write_XML, METH_VARARGS,
      "write_XML(filename) writes the LWPR model to an XML file."},
     {"write_binary", (PyCFunction)PyLWPR_write_binary, METH_VARARGS,
