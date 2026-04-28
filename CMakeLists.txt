@@ -32,7 +32,7 @@ if(${EIGEN3_FOUND})
   include_directories(${EIGEN3_INCLUDE_DIR})
 endif(${EIGEN3_FOUND})
 
-set(LWPR_VERSION_STRING 1.2.6)
+set(LWPR_VERSION_STRING 1.3.6)
 set(LWPR_SOVERSION_STRING 1)
 
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/include/lwpr_config.h)
@@ -48,6 +48,11 @@ if(${BUILD_SHARED_LIBS})
   target_link_libraries(lwpr ${CMAKE_THREAD_LIBS_INIT} -lm ${EXPAT_LIBRARIES})
   set_target_properties(lwpr PROPERTIES VERSION ${LWPR_VERSION_STRING} SOVERSION ${LWPR_SOVERSION_STRING})
   target_compile_definitions(lwpr PRIVATE LIBRARY_EXPORTS=1)
+  target_include_directories(lwpr
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>
+  )
 endif(${BUILD_SHARED_LIBS})
 
 if(${BUILD_STATIC_LIBS})
@@ -58,6 +63,11 @@ if(${BUILD_STATIC_LIBS})
     set_target_properties(lwpr_static PROPERTIES OUTPUT_NAME "lwpr")
   endif(MSVC)
   set_target_properties(lwpr_static PROPERTIES VERSION ${LWPR_VERSION_STRING})
+  target_include_directories(lwpr_static
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>
+  )
 endif(${BUILD_STATIC_LIBS})
 
 if(${BUILD_EXAMPLES})
@@ -114,19 +124,43 @@ if(${MATLAB_FOUND})
 	endif(${EXPAT_FOUND})
 endif(${MATLAB_FOUND})
 
-if(${BUILD_SHARED_LIBS})
-	install(TARGETS lwpr
-	    DESTINATION lib
-	    LIBRARY DESTINATION lib
-	    ARCHIVE DESTINATION lib)
-endif(${BUILD_SHARED_LIBS})
 
-if(${BUILD_STATIC_LIBS})
-	install(TARGETS lwpr_static
-	    DESTINATION lib
-	    LIBRARY DESTINATION lib
-	    ARCHIVE DESTINATION lib)
-endif(${BUILD_STATIC_LIBS})
+############### INSTALL
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/lwpr_config.h
+  DESTINATION include
+)
+
+if(BUILD_SHARED_LIBS)
+  install(TARGETS lwpr
+    EXPORT lwprTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+  )
+endif()
+
+if(BUILD_STATIC_LIBS)
+  install(TARGETS lwpr_static
+    EXPORT lwprTargets
+    ARCHIVE DESTINATION lib
+    INCLUDES DESTINATION include
+  )
+endif()
+
+install(
+  EXPORT lwprTargets
+  FILE lwprTargets.cmake
+  NAMESPACE lwpr::
+  DESTINATION lib/cmake/lwpr
+)
 
 if(${BUILD_EXAMPLES})
 	install(TARGETS example_c example_cpp RUNTIME DESTINATION bin)
@@ -144,3 +178,24 @@ if(${MATLAB_FOUND})
 	ENDFOREACH()
 	install(FILES ${MATLAB_NATIVE} DESTINATION share/Matlab)
 endif(${MATLAB_FOUND})
+
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/lwprConfigVersion.cmake"
+  VERSION ${LWPR_VERSION_STRING}
+  COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/lwprConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/lwprConfig.cmake
+  INSTALL_DESTINATION lib/cmake/lwpr
+)
+
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/lwprConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/lwprConfigVersion.cmake
+  DESTINATION lib/cmake/lwpr
+)
+
