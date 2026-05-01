@@ -258,6 +258,10 @@ class LWPR_ReceptiveFieldObject {
       return s;
    }
 
+   double w() const {
+      return RF->w;
+   }
+
 #ifdef EIGEN3_FOUND
    Eigen::VectorXd meanX_eig() const {
       return doubleVecToEigen(meanX());
