@@ -438,7 +438,7 @@ class LWPR_Object {
       \exception LWPR_Exception::BAD_INPUT_DIM  
          if the parameter x does not match the model dimensions
    */      
-   doubleVec predict(const doubleVec& x, double cutoff = 0.001) {
+   doubleVec predict(const doubleVec& x, double cutoff = 0.001) const {
       doubleVec yp(model.nOut);   
 
       if (x.size()!=(unsigned) model.nIn) {
@@ -462,7 +462,7 @@ class LWPR_Object {
       \exception LWPR_Exception::BAD_INPUT_DIM  
          if the parameter x does not match the model dimensions
    */      
-   doubleVec predict(const doubleVec& x, doubleVec& confidence, double cutoff = 0.001) {
+   doubleVec predict(const doubleVec& x, doubleVec& confidence, double cutoff = 0.001) const {
       doubleVec yp(model.nOut);   
       
       if (x.size()!=(unsigned) model.nIn) {
@@ -489,7 +489,7 @@ class LWPR_Object {
       \exception LWPR_Exception::BAD_INPUT_DIM  
          if the parameter x does not match the model dimensions
    */      
-   doubleVec predict(const doubleVec& x, doubleVec& confidence, doubleVec& maxW, double cutoff = 0.001) {
+   doubleVec predict(const doubleVec& x, doubleVec& confidence, doubleVec& maxW, double cutoff = 0.001) const {
       doubleVec yp(model.nOut);   
       
       if (x.size()!=(unsigned) model.nIn) {
@@ -743,7 +743,7 @@ class LWPR_Object {
       setInitD(EigenTodoubleVec(initD));
    }
 
-   Eigen::VectorXd predict(const Eigen::Ref<const Eigen::VectorXd> x, Eigen::Ref<Eigen::VectorXd> confidence, Eigen::Ref<Eigen::VectorXd> maxW, double cutoff = 0.001) {
+   Eigen::VectorXd predict(const Eigen::Ref<const Eigen::VectorXd> x, Eigen::Ref<Eigen::VectorXd> confidence, Eigen::Ref<Eigen::VectorXd> maxW, double cutoff = 0.001) const {
       doubleVec conf_, maxW_, ret;
 	  ret = predict(EigenTodoubleVec(x), conf_, maxW_, cutoff);
 	  confidence = doubleVecToEigen(conf_);
@@ -751,14 +751,14 @@ class LWPR_Object {
 	  return doubleVecToEigen(ret);
    }
 
-   Eigen::VectorXd predict(const Eigen::Ref<const Eigen::VectorXd> x, Eigen::Ref<Eigen::VectorXd> confidence, double cutoff = 0.001) {
+   Eigen::VectorXd predict(const Eigen::Ref<const Eigen::VectorXd> x, Eigen::Ref<Eigen::VectorXd> confidence, double cutoff = 0.001) const {
 	   doubleVec conf_, ret;
 	   ret = predict(EigenTodoubleVec(x), conf_, cutoff);
 	   confidence = doubleVecToEigen(conf_);
 	   return doubleVecToEigen(ret);
    }
 
-   Eigen::VectorXd predict(const Eigen::Ref<const Eigen::VectorXd> x, double cutoff = 0.001) {
+   Eigen::VectorXd predict(const Eigen::Ref<const Eigen::VectorXd> x, double cutoff = 0.001) const {
 	   return doubleVecToEigen(predict(EigenTodoubleVec(x), cutoff));
    }
 
