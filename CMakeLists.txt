@@ -14,7 +14,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_package(Threads REQUIRED)
 if(${USE_EXPAT})
-  find_package(EXPAT)
+  find_package(EXPAT REQUIRED)
   set(HAVE_LIBEXPAT ${EXPAT_FOUND})
 endif(${USE_EXPAT})
 
@@ -45,7 +45,12 @@ set(LWPR_SOURCES src/lwpr.c src/lwpr_aux.c src/lwpr_binio.c src/lwpr_math.c src/
 
 if(${BUILD_SHARED_LIBS})
   add_library(lwpr SHARED ${LWPR_SOURCES})
-  target_link_libraries(lwpr ${CMAKE_THREAD_LIBS_INIT} -lm ${EXPAT_LIBRARIES})
+  target_link_libraries(lwpr
+    PUBLIC
+      Threads::Threads
+      m
+      EXPAT::EXPAT
+  )
   set_target_properties(lwpr PROPERTIES VERSION ${LWPR_VERSION_STRING} SOVERSION ${LWPR_SOVERSION_STRING})
   target_compile_definitions(lwpr PRIVATE LIBRARY_EXPORTS=1)
   target_include_directories(lwpr
