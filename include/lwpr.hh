@@ -46,23 +46,23 @@ Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 typedef std::vector<double> doubleVec;
 
 #ifdef EIGEN3_FOUND
-Eigen::VectorXd doubleVecToEigen(const doubleVec& ret) {
+inline Eigen::VectorXd doubleVecToEigen(const doubleVec& ret) {
       return Eigen::Map<Eigen::VectorXd>(const_cast<double*>(ret.data()),ret.size());
    }
 
-Eigen::MatrixXd doubleVecToEigen(const std::vector<doubleVec>& tmp) {
+inline Eigen::MatrixXd doubleVecToEigen(const std::vector<doubleVec>& tmp) {
       Eigen::MatrixXd ret(tmp.size(), tmp[0].size());
       for(int i=0;i<tmp.size();i++) ret.row(i) = Eigen::Map<Eigen::VectorXd>(const_cast<double*>(tmp[i].data()),tmp[i].size());
       return ret;
    }
 
-std::vector<Eigen::VectorXd> doubleVecToEigenVec(const std::vector<doubleVec>& tmp) {
+inline std::vector<Eigen::VectorXd> doubleVecToEigenVec(const std::vector<doubleVec>& tmp) {
 	std::vector<Eigen::VectorXd> ret(tmp.size());
 	for (int i = 0; i<tmp.size(); i++) ret[i] = Eigen::Map<Eigen::VectorXd>(const_cast<double*>(tmp[i].data()), tmp[i].size());
 	return ret;
 }
 
-doubleVec EigenTodoubleVec(const Eigen::Ref<const Eigen::VectorXd> ret) {
+inline doubleVec EigenTodoubleVec(const Eigen::Ref<const Eigen::VectorXd> ret) {
       return doubleVec(ret.data(),ret.data()+ret.rows());
    }
 #endif
