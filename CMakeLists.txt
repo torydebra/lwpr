@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.16)
 project(lwpr)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
@@ -164,7 +164,7 @@ install(
   EXPORT lwprTargets
   FILE lwprTargets.cmake
   NAMESPACE lwpr::
-  DESTINATION lib/cmake/lwpr
+  DESTINATION share/${PROJECT_NAME}/cmake
 )
 
 if(${BUILD_EXAMPLES})
@@ -187,20 +187,20 @@ endif(${MATLAB_FOUND})
 include(CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/lwprConfigVersion.cmake"
-  VERSION ${LWPR_VERSION_STRING}
-  COMPATIBILITY SameMajorVersion
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    VERSION ${LWPR_VERSION_STRING}
+    COMPATIBILITY SameMajorVersion
 )
 
 configure_package_config_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/lwprConfig.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/lwprConfig.cmake
-  INSTALL_DESTINATION lib/cmake/lwpr
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    INSTALL_DESTINATION share/${PROJECT_NAME}/cmake
 )
 
 install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/lwprConfig.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/lwprConfigVersion.cmake
-  DESTINATION lib/cmake/lwpr
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+  DESTINATION share/${PROJECT_NAME}/cmake
 )
 
